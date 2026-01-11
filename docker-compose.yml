@@ -1,0 +1,33 @@
+services:
+  antigravity-lite:
+    build: .
+    container_name: antigravity-lite
+    restart: unless-stopped
+    env_file:
+      - /home/fedora/projects/antigravity-dashboard/.env
+    environment:
+      - PORT=3456
+      - QUOTA_POLL_INTERVAL=120000
+    volumes:
+      - /home/fedora/.config/opencode/antigravity-accounts.json:/root/.config/opencode/antigravity-accounts.json:ro
+    networks:
+      - proxy
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.antigravity.rule=Host(`antigravity.logge.top`)"
+      - "traefik.http.routers.antigravity.entrypoints=web"
+      - "traefik.http.routers.antigravity-secure.rule=Host(`antigravity.logge.top`)"
+      - "traefik.http.routers.antigravity-secure.entrypoints=websecure"
+      - "traefik.http.routers.antigravity-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.services.antigravity.loadbalancer.server.port=3456"
+      - "traefik.http.routers.antigravity.service=antigravity"
+      - "traefik.http.routers.antigravity-secure.service=antigravity"
+    expose:
+      - "3456"
+
+networks:
+  proxy:
+    external: true
+  dokploy-network:
+    external: true
