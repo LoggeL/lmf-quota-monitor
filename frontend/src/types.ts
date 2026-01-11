@@ -15,9 +15,11 @@ export interface AccountQuota {
   fetchError?: string;
   models: ModelQuota[];
   claudeQuotaPercent: number | null;
-  geminiQuotaPercent: number | null;
+  geminiFlashQuotaPercent: number | null;
+  geminiProQuotaPercent: number | null;
   claudeResetTime: number | null;
-  geminiResetTime: number | null;
+  geminiFlashResetTime: number | null;
+  geminiProResetTime: number | null;
 }
 
 export interface Account {

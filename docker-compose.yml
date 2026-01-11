@@ -4,7 +4,7 @@ services:
     container_name: antigravity-lite
     restart: unless-stopped
     env_file:
-      - /home/fedora/projects/antigravity-dashboard/.env
+      - .env
     environment:
       - PORT=3456
       - QUOTA_POLL_INTERVAL=120000

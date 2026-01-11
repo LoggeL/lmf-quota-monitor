@@ -139,9 +139,11 @@ export class QuotaService extends EventEmitter {
       lastFetched: Date.now(),
       models: [],
       claudeQuotaPercent: null,
-      geminiQuotaPercent: null,
+      geminiFlashQuotaPercent: null,
+      geminiProQuotaPercent: null,
       claudeResetTime: null,
-      geminiResetTime: null,
+      geminiFlashResetTime: null,
+      geminiProResetTime: null,
     };
 
     const accessToken = await this.refreshAccessToken(refreshToken);
@@ -171,16 +173,30 @@ export class QuotaService extends EventEmitter {
       result.claudeResetTime = minClaude.resetTimeMs;
     }
 
-    // Calculate Gemini quota (min of all gemini models)
-    const geminiModels = result.models.filter(m =>
-      m.modelName.toLowerCase().includes('gemini')
+    // Calculate Gemini Flash quota
+    const geminiFlashModels = result.models.filter(m =>
+      m.modelName.toLowerCase().includes('gemini') &&
+      m.modelName.toLowerCase().includes('flash')
     );
-    if (geminiModels.length > 0) {
-      const minGemini = geminiModels.reduce((min, m) =>
+    if (geminiFlashModels.length > 0) {
+      const minFlash = geminiFlashModels.reduce((min, m) =>
         m.remainingPercent < min.remainingPercent ? m : min
       );
-      result.geminiQuotaPercent = minGemini.remainingPercent;
-      result.geminiResetTime = minGemini.resetTimeMs;
+      result.geminiFlashQuotaPercent = minFlash.remainingPercent;
+      result.geminiFlashResetTime = minFlash.resetTimeMs;
+    }
+
+    // Calculate Gemini Pro quota
+    const geminiProModels = result.models.filter(m =>
+      m.modelName.toLowerCase().includes('gemini') &&
+      m.modelName.toLowerCase().includes('pro')
+    );
+    if (geminiProModels.length > 0) {
+      const minPro = geminiProModels.reduce((min, m) =>
+        m.remainingPercent < min.remainingPercent ? m : min
+      );
+      result.geminiProQuotaPercent = minPro.remainingPercent;
+      result.geminiProResetTime = minPro.resetTimeMs;
     }
 
     this.quotaCache.set(email, result);
@@ -213,9 +229,11 @@ export class QuotaService extends EventEmitter {
         fetchError: result.reason?.message || 'Unknown error',
         models: [],
         claudeQuotaPercent: null,
-        geminiQuotaPercent: null,
+        geminiFlashQuotaPercent: null,
+        geminiProQuotaPercent: null,
         claudeResetTime: null,
-        geminiResetTime: null,
+        geminiFlashResetTime: null,
+        geminiProResetTime: null,
       };
     });
 

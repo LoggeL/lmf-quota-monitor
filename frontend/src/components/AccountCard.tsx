@@ -42,9 +42,15 @@ export function AccountCard({ account }: AccountCardProps) {
             color="orange"
           />
           <QuotaBar
-            label="Gemini"
-            percent={account.quota?.geminiQuotaPercent ?? null}
-            resetTime={account.quota?.geminiResetTime ?? null}
+            label="Flash"
+            percent={account.quota?.geminiFlashQuotaPercent ?? null}
+            resetTime={account.quota?.geminiFlashResetTime ?? null}
+            color="blue"
+          />
+          <QuotaBar
+            label="Pro"
+            percent={account.quota?.geminiProQuotaPercent ?? null}
+            resetTime={account.quota?.geminiProResetTime ?? null}
             color="blue"
           />
         </div>
