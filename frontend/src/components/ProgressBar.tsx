@@ -22,17 +22,17 @@ export function ProgressBar({ durationMs, onComplete, isPaused }: ProgressBarPro
       if (elapsed >= durationMs) {
         clearInterval(interval);
         onComplete();
-        setProgress(0); // Reset immediately for next cycle
+        setProgress(0);
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [durationMs, onComplete, isPaused]); // Re-run when these change, effectively resetting on onComplete if parent triggers re-render or logic
+  }, [durationMs, onComplete, isPaused]);
 
   return (
-    <div className="fixed bottom-0 left-0 w-full h-1 bg-gray-200">
+    <div className="fixed bottom-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700">
       <div 
-        className="h-full bg-blue-500 transition-all duration-100 ease-linear"
+        className="h-full bg-blue-500 dark:bg-blue-400 transition-all duration-100 ease-linear"
         style={{ width: `${progress}%` }}
       />
     </div>

@@ -13,14 +13,14 @@ export function AccountCard({ account }: AccountCardProps) {
       className={`
         p-4 rounded-lg border transition-all
         ${account.isActive 
-          ? 'border-green-500 bg-green-50' 
-          : 'border-gray-200 bg-white'
+          ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600' 
+          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
         }
       `}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-900">{account.email}</span>
+          <span className="font-medium text-gray-900 dark:text-white">{account.email}</span>
           {account.isActive && (
             <span className="px-2 py-0.5 text-xs font-medium bg-green-500 text-white rounded-full">
               Active
@@ -30,7 +30,7 @@ export function AccountCard({ account }: AccountCardProps) {
       </div>
 
       {hasError ? (
-        <div className="text-sm text-red-500">
+        <div className="text-sm text-red-500 dark:text-red-400">
           Error: {account.quota?.fetchError}
         </div>
       ) : (
@@ -57,7 +57,7 @@ export function AccountCard({ account }: AccountCardProps) {
       )}
 
       {account.quota?.lastFetched && (
-        <div className="mt-2 text-xs text-gray-400">
+        <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
           Updated {formatRelativeTime(account.quota.lastFetched)}
         </div>
       )}

@@ -9,8 +9,21 @@ const POLL_INTERVAL = 120000; // 2 minutes
 export default function App() {
   const { accounts, loading, error, setAccounts, setError, setLoading } = useStore();
   const [refreshing, setRefreshing] = useState(false);
-  // This state is used to trigger a reset of the progress bar
   const [pollKey, setPollKey] = useState(0);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('darkMode');
+      if (saved !== null) return saved === 'true';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  // Apply dark mode class to html element
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('darkMode', String(darkMode));
+  }, [darkMode]);
 
   const loadData = useCallback(async (isRefresh = false) => {
     try {
@@ -34,32 +47,50 @@ export default function App() {
 
   const handleManualRefresh = async () => {
     await loadData(true);
-    setPollKey(prev => prev + 1); // Reset timer
+    setPollKey(prev => prev + 1);
   };
 
   const handlePollComplete = useCallback(() => {
     loadData();
-    setPollKey(prev => prev + 1); // Reset timer
+    setPollKey(prev => prev + 1);
   }, [loadData]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-8 transition-colors">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 transition-colors">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
               LMF Quota Monitor
             </h1>
           </div>
           
           <div className="flex items-center gap-3">
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {darkMode ? (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+
             <button
               onClick={handleManualRefresh}
               disabled={refreshing}
               className="
                 px-4 py-2 text-sm font-medium rounded-lg
-                bg-gray-900 text-white hover:bg-gray-800
+                bg-gray-900 dark:bg-white text-white dark:text-gray-900 
+                hover:bg-gray-800 dark:hover:bg-gray-100
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-colors
               "
@@ -73,17 +104,17 @@ export default function App() {
       {/* Main Content */}
       <main className="max-w-3xl mx-auto p-6">
         {loading && accounts.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             Loading accounts...
           </div>
         ) : error ? (
-          <div className="text-center py-12 text-red-500">
+          <div className="text-center py-12 text-red-500 dark:text-red-400">
             Error: {error}
           </div>
         ) : accounts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-2">No accounts found</p>
-            <p className="text-sm text-gray-400">
+            <p className="text-gray-500 dark:text-gray-400 mb-2">No accounts found</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">
               Add accounts to ~/.config/opencode/antigravity-accounts.json
             </p>
           </div>
@@ -97,13 +128,13 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-4 text-xs text-gray-400 flex flex-col gap-2 items-center">
+      <footer className="text-center py-4 text-xs text-gray-400 dark:text-gray-500 flex flex-col gap-2 items-center">
         <p>{accounts.length} account{accounts.length !== 1 ? 's' : ''} • 5-hour rolling quotas</p>
         <a 
           href="https://github.com/LoggeL/lmf-quota-monitor" 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="hover:text-gray-600 transition-colors flex items-center gap-1"
+          className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex items-center gap-1"
         >
           <span>View source on GitHub</span>
           <svg height="12" width="12" viewBox="0 0 16 16" fill="currentColor">
