@@ -46,17 +46,81 @@ function getEnrichedAccounts(): Account[] {
   const accounts = accountsService.getAccounts();
   const quotas = quotaService.getCachedQuotas();
   const quotaMap = new Map(quotas.map(q => [q.email, q]));
+  const now = Date.now();
 
   return accounts.map(acc => {
     const quota = quotaMap.get(acc.email);
+    const rateLimits = acc.rateLimitResetTimes || {};
+    
+    // Find active rate limits
+    const claudeResetTime = rateLimits['claude'];
+    const isClaudeRateLimited = claudeResetTime && claudeResetTime > now;
+    
+    // Find Gemini Flash rate limit (check keys containing 'flash')
+    const flashKey = Object.keys(rateLimits).find(k => k.toLowerCase().includes('flash'));
+    const flashResetTime = flashKey ? rateLimits[flashKey] : undefined;
+    const isFlashRateLimited = flashResetTime && flashResetTime > now;
+    
+    // Find Gemini Pro rate limit (check keys containing 'pro')
+    const proKey = Object.keys(rateLimits).find(k => k.toLowerCase().includes('pro'));
+    const proResetTime = proKey ? rateLimits[proKey] : undefined;
+    const isProRateLimited = proResetTime && proResetTime > now;
+    
+    // Build quota with rate limit overrides
+    let enrichedQuota = quota ? {
+      ...quota,
+      email: anonymizeEmail(quota.email),
+    } : null;
+    
+    // If rate limited, override quota to 0% and set reset time
+    if (enrichedQuota) {
+      // Check for explicit rate limits from config
+      if (isClaudeRateLimited) {
+        enrichedQuota.claudeQuotaPercent = 0;
+        enrichedQuota.claudeResetTime = claudeResetTime;
+      }
+      if (isFlashRateLimited) {
+        enrichedQuota.geminiFlashQuotaPercent = 0;
+        enrichedQuota.geminiFlashResetTime = flashResetTime;
+      }
+      if (isProRateLimited) {
+        enrichedQuota.geminiProQuotaPercent = 0;
+        enrichedQuota.geminiProResetTime = proResetTime;
+      }
+      
+      // If API returns 100% but no reset time, it's likely rate-limited (show 0%)
+      if (enrichedQuota.claudeQuotaPercent === 100 && !enrichedQuota.claudeResetTime) {
+        enrichedQuota.claudeQuotaPercent = 0;
+      }
+      if (enrichedQuota.geminiFlashQuotaPercent === 100 && !enrichedQuota.geminiFlashResetTime) {
+        enrichedQuota.geminiFlashQuotaPercent = 0;
+      }
+      if (enrichedQuota.geminiProQuotaPercent === 100 && !enrichedQuota.geminiProResetTime) {
+        enrichedQuota.geminiProQuotaPercent = 0;
+      }
+    } else {
+      // Create a quota object if API didn't return one but we have rate limits
+      if (isClaudeRateLimited || isFlashRateLimited || isProRateLimited) {
+        enrichedQuota = {
+          email: anonymizeEmail(acc.email),
+          projectId: acc.projectId,
+          lastFetched: now,
+          models: [],
+          claudeQuotaPercent: isClaudeRateLimited ? 0 : null,
+          geminiFlashQuotaPercent: isFlashRateLimited ? 0 : null,
+          geminiProQuotaPercent: isProRateLimited ? 0 : null,
+          claudeResetTime: isClaudeRateLimited ? claudeResetTime : null,
+          geminiFlashResetTime: isFlashRateLimited ? flashResetTime : null,
+          geminiProResetTime: isProRateLimited ? proResetTime : null,
+        };
+      }
+    }
+    
     return {
       email: anonymizeEmail(acc.email),
       projectId: acc.projectId,
       isActive: acc.isActive,
-      quota: quota ? {
-        ...quota,
-        email: anonymizeEmail(quota.email),
-      } : null,
+      quota: enrichedQuota,
     };
   });
 }

@@ -40,7 +40,7 @@ export function QuotaBar({ label, percent, resetTime, color }: QuotaBarProps) {
         />
       </div>
       <span className="w-12 text-right font-mono text-gray-700 dark:text-gray-200">{percent}%</span>
-      {resetTime && percent < 100 && (
+      {resetTime && (
         <span className="text-xs text-gray-400 dark:text-gray-500">
           ({formatTimeUntil(resetTime)})
         </span>

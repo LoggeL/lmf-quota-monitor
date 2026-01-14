@@ -10,22 +10,11 @@ export function AccountCard({ account }: AccountCardProps) {
 
   return (
     <div
-      className={`
-        p-4 rounded-lg border transition-all
-        ${account.isActive 
-          ? 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-600' 
-          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-        }
-      `}
+      className="p-4 rounded-lg border transition-all border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="font-medium text-gray-900 dark:text-white">{account.email}</span>
-          {account.isActive && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-green-500 text-white rounded-full">
-              Active
-            </span>
-          )}
         </div>
       </div>
 

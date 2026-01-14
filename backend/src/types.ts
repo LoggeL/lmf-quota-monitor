@@ -35,6 +35,7 @@ export interface RawAccountData {
   projectId?: string;
   addedAt?: number;
   lastUsed?: number;
+  rateLimitResetTimes?: Record<string, number>;
 }
 
 export interface RawAccountsFile {

@@ -12,6 +12,7 @@ export interface SimpleAccount {
   projectId?: string;
   isActive: boolean;
   refreshToken: string;
+  rateLimitResetTimes?: Record<string, number>;
 }
 
 export class AccountsFileService extends EventEmitter {
@@ -65,6 +66,7 @@ export class AccountsFileService extends EventEmitter {
         projectId: raw.projectId,
         isActive: index === data.activeIndex,
         refreshToken: raw.refreshToken,
+        rateLimitResetTimes: raw.rateLimitResetTimes,
       }));
 
       console.log(`[Accounts] Loaded ${this.accounts.length} accounts`);
